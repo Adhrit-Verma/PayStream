@@ -14,13 +14,12 @@ router.post('/register', async (req, res) => {
   const { username, email, password } = req.body;
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({
+    const user = await User.create({
       username,
       email,
       password: hashedPassword
     });
-    await user.save();
-    req.session.userId = user._id;
+    req.session.userId = user.id;
     res.redirect('/dashboard');
   } catch (err) {
     console.error(err);
@@ -37,11 +36,11 @@ router.get('/login', (req, res) => {
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ where: { email } });
     if (!user) return res.status(400).send('User not found.');
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(400).send('Incorrect password.');
-    req.session.userId = user._id;
+    req.session.userId = user.id;
     res.redirect('/dashboard');
   } catch (err) {
     console.error(err);

@@ -1,8 +1,14 @@
 // config/db.js
-const mongoose = require('mongoose');
+const { Sequelize } = require('sequelize');
 
-const dbURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/upi_alerts';
-mongoose
-  .connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('MongoDB connection error:', err));
+const sequelize = new Sequelize(process.env.POSTGRES_URI, {
+  dialect: 'postgres',
+  logging: false, // Disable logging for clarity
+});
+
+// Test the connection
+sequelize.authenticate()
+  .then(() => console.log('PostgreSQL connected'))
+  .catch(err => console.error('PostgreSQL connection error:', err));
+
+module.exports = sequelize;

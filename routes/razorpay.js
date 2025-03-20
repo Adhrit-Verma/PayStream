@@ -10,9 +10,9 @@ const razorpayInstance = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 
-// Endpoint to create a new Razorpay order
+// Create a new Razorpay order
 router.post('/create-order', async (req, res) => {
-  const { amount } = req.body; // amount should be in paise (e.g., 1000 = ₹10)
+  const { amount } = req.body; // amount in paise (e.g., 1000 = ₹10)
   const options = {
     amount: amount,
     currency: "INR",
@@ -28,17 +28,15 @@ router.post('/create-order', async (req, res) => {
   }
 });
 
-// Webhook endpoint to handle payment confirmation (update transactions)
-// NOTE: In a production app, verify the webhook signature from Razorpay.
+// Payment callback endpoint to record transactions
 router.post('/payment-callback', async (req, res) => {
-  const { razorpay_order_id, amount, userId } = req.body; // Ensure you map the order to a user securely
+  const { razorpay_order_id, amount, userId } = req.body;
   try {
-    const transaction = new Transaction({
-      user: userId,
+    await Transaction.create({
+      userId: userId,
       amount: amount,
       razorpayOrderId: razorpay_order_id
     });
-    await transaction.save();
     res.status(200).json({ message: 'Payment recorded.' });
   } catch (err) {
     console.error(err);

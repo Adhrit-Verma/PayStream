@@ -5,8 +5,8 @@ const session = require('express-session');
 const path = require('path');
 const bodyParser = require('body-parser');
 
-// Connect to the database
-require('./config/db');
+// Import the database connection (PostgreSQL via Sequelize)
+const sequelize = require('./config/db');
 
 const app = express();
 
@@ -17,11 +17,12 @@ app.use(
   session({
     secret: process.env.SESSION_SECRET || 'mysecret',
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: false, // For production, adjust as needed
+    // For production, consider using a session store like connect-pg-simple or connect-redis.
   })
 );
 
-// Serve static files from the "public" folder
+// Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Mount Routes
@@ -35,8 +36,11 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Start server
+// Sync database models and then start the server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+sequelize.sync()  // You can use { force: true } here during development to reset tables
+  .then(() => {
+    console.log('Database synced');
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  })
+  .catch(err => console.error('Database sync error:', err));

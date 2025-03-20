@@ -1,19 +1,41 @@
 // models/User.js
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
 
-const UserSchema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true },
-  email:    { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  upiId:    { type: String },
-  bankAccount: {
-    accountNumber: { type: String },
-    ifsc:          { type: String }
+const User = sequelize.define('User', {
+  username: { 
+    type: DataTypes.STRING, 
+    allowNull: false, 
+    unique: true 
   },
-  alertSettings: {
-    sound:    { type: String, default: 'default' },
-    duration: { type: Number, default: 5 } // seconds
+  email: { 
+    type: DataTypes.STRING, 
+    allowNull: false, 
+    unique: true 
+  },
+  password: { 
+    type: DataTypes.STRING, 
+    allowNull: false 
+  },
+  upiId: { 
+    type: DataTypes.STRING 
+  },
+  accountNumber: { 
+    type: DataTypes.STRING 
+  },
+  ifsc: { 
+    type: DataTypes.STRING 
+  },
+  alertSound: { 
+    type: DataTypes.STRING, 
+    defaultValue: 'default' 
+  },
+  alertDuration: { 
+    type: DataTypes.INTEGER, 
+    defaultValue: 5 
   }
+}, {
+  tableName: 'users'
 });
 
-module.exports = mongoose.model('User', UserSchema);
+module.exports = User;

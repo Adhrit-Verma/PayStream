@@ -1,11 +1,23 @@
 // models/Transaction.js
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const User = require('./User');
 
-const TransactionSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  amount: { type: Number, required: true },
-  razorpayOrderId: { type: String },
-  createdAt: { type: Date, default: Date.now }
+const Transaction = sequelize.define('Transaction', {
+  amount: { 
+    type: DataTypes.FLOAT, 
+    allowNull: false 
+  },
+  razorpayOrderId: { 
+    type: DataTypes.STRING 
+  }
+}, {
+  tableName: 'transactions',
+  timestamps: true  // Sequelize automatically adds createdAt and updatedAt
 });
 
-module.exports = mongoose.model('Transaction', TransactionSchema);
+// Set up the association between transactions and users
+Transaction.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+User.hasMany(Transaction, { foreignKey: 'userId', as: 'transactions' });
+
+module.exports = Transaction;

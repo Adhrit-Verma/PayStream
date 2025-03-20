@@ -3,16 +3,15 @@ const express = require('express');
 const router = express.Router();
 const Transaction = require('../models/Transaction');
 
-// Middleware to check authentication
+// Middleware to check if user is authenticated
 function isAuthenticated(req, res, next) {
   if (req.session.userId) return next();
   res.redirect('/auth/login');
 }
 
-// Dashboard route
 router.get('/', isAuthenticated, async (req, res) => {
   try {
-    const transactions = await Transaction.find({ user: req.session.userId });
+    const transactions = await Transaction.findAll({ where: { userId: req.session.userId } });
     const totalEarnings = transactions.reduce((sum, txn) => sum + txn.amount, 0);
     res.send(`
       <h1>Dashboard</h1>
